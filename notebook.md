@@ -8,8 +8,8 @@ The Lamport paper presents two implementation rules for logical clocks. Let $T_e
    2. Upon receiving message $m$, process $P_j$ sets $C_j$ greater than or equal to its present value and greater than $T_m$.
 
 In accordance to the specifications described in lecture, we will represent values of events as non-negative integers. A process will increment their clock value by 1 after each event. If $e$ and $e'$ are consecutive events in a process $P_i$, and $e'$ is an event from a different process, $P_i$ will update $C_i$ in the following manner:
-$$C_i(e') = \max(C_i(e), T_e') + 1$$
-where $T_e$ is the receive event's timestamp.
+$$C_i(e') = \max(C_i(e), T_{e'}) + 1$$
+where $T_{e'}$ is the receive event's timestamp.
 
 Questions
 1. Is there a need to keep a history of previous $C_i(e)$ values? Or is it sufficient to keep track of the current clock time in a single variable?
