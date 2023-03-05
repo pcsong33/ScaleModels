@@ -19,7 +19,7 @@ class ModelMachine:
         self.conn = None
         self.client_s = None
         self.logical_clock = 0
-        self.filename = 'clock_rate_' + str(round(self.clock_rate, 2)) + '.csv'
+        self.filename = 'pid_' + str(config[3]) + '_clock_rate_' + str(round(self.clock_rate, 2)) + '.csv'
 
         # create csv file
         self.init_log()
