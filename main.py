@@ -19,7 +19,7 @@ It is initialized with a randomly generated clock rate, and logs all operations
 to a csv file.
 '''
 class ModelMachine:
-    def __init__(self, clock_rate, config):
+    def __init__(self, clock_rate, config, directory="logs"):
         self.server_port = config[0]
         self.client_port = config[1]
         self.pid = str(config[2])
@@ -29,8 +29,10 @@ class ModelMachine:
         self.server_socket = None
         self.client_socket = None
         self.logical_clock = 0
-        self.filename = f"logs/pid_{self.pid}_clockrate_{str(self.clock_rate)}.csv"
+        self.filename = f"{directory}/pid_{self.pid}_clockrate_{str(self.clock_rate)}.csv"
 
+    # Performs initialization operations to setup a machine
+    def init_machine(self):
         # Create csv file
         self.init_log()
 
@@ -134,6 +136,7 @@ def machine(config):
     config.append(os.getpid())
     clock_rate = randint(1, 6)
     model_machine = ModelMachine(clock_rate, config)
+    model_machine.init_machine()
     model_machine.perform_ops()
     return
 

@@ -1,3 +1,11 @@
+## 3/6/23
+We've begun creating some unit tests. Code in `main.py` was slightly refactored to enable
+cleaner testing.
+
+Current Unit Test Coverage:
+1. `init_logs`
+2. `update_logs` - in progress
+
 ## 3/5/23
 We've coded an implementation of the scale model using processes and threads. A design and scalability explanation is described below.
 ### Design
@@ -14,6 +22,7 @@ Things to do:
 1. Write tests. According to the 2/27 lecture, unit tests do not need to be end-to-end, 
 but need to test smallest units of functioning code. 
 2. Run experiments. It would be comprehensive to perhaps run multiple trials with deterministic clock rates, to better analyze the data and understand average performance. 
+3. Exit Gracefully. Not high priority, but find a way to close sockets and threads and shutdown machines gracefully.
 
 
 ## 2/28/23
