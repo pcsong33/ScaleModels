@@ -1,3 +1,21 @@
+## 3/5/23
+We've coded an implementation of the scale model using processes and threads. A design and scalability explanation is described below.
+### Design
+Upon program initialization, three processes are started. The processes are given 
+2 ports: one port to connect server-side and one port to connect client-side. Messages
+are received via background threads listening on both the server and client ports. Every clock cycle,
+an event (receive message, send message, internal event) is logged in a csv file for each process.
+
+### Scalability
+With this model, we can scale to $n$ processes, by creating ${n\choose 2}$ total connections between all of the processes. Since the sockets 
+are bidirectional, only one of the processes need to initialize a connection request.
+
+Things to do:
+1. Write tests. According to the 2/27 lecture, unit tests do not need to be end-to-end, 
+but need to test smallest units of functioning code. 
+2. Run experiments. It would be comprehensive to perhaps run multiple trials with deterministic clock rates, to better analyze the data and understand average performance. 
+
+
 ## 2/28/23
 This initial entry is a synthesis of the materials from the 2/27 lecture and the Lamport reading that pertain to the Scale Models project. We also outline some initial first steps.
 The Lamport paper presents two implementation rules for logical clocks. Let $T_e = C_i(e)$ be the value that the logical clock $C_i$ for process $P_i$ assigns to an event $e$:
