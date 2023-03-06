@@ -4,7 +4,7 @@ cleaner testing.
 
 Current Unit Test Coverage:
 1. `init_logs`
-2. `update_logs` - in progress
+2. `update_logs`
 
 ## 3/5/23
 We've coded an implementation of the scale model using processes and threads. A design and scalability explanation is described below.

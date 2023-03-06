@@ -5,6 +5,7 @@ import csv
 
 DIR = 'test_logs'
 
+
 class ScaleModelTest(unittest.TestCase):
     # Helper function to remove all files in a directory
     def empty_directory(self, dir):
@@ -13,12 +14,24 @@ class ScaleModelTest(unittest.TestCase):
             if os.path.isfile(file):
                 os.remove(file)
 
-    def test_init_log(self):
-        # create temporary test_logs directory, or empty an existing one
-        if os.path.isdir(DIR):
-            self.empty_directory(DIR)
+    # Helper function to create test directory
+    def create_dir(self, dir):
+        if os.path.isdir(dir):
+            self.empty_directory(dir)
         else:
-            os.mkdir(DIR)
+            os.mkdir(dir)
+
+    def csv_to_list(self, filename):
+        rows = []
+        with open(filename, 'r', newline='') as f:
+            csvreader = csv.reader(f)
+            for row in csvreader:
+                rows.append(row)
+        return rows
+
+
+    def test_init_log(self):
+        self.create_dir(DIR)
 
         process = ModelMachine(1, ['port1', 'port2', 0], DIR)
 
@@ -38,11 +51,7 @@ class ScaleModelTest(unittest.TestCase):
         self.assertEqual(len(os.listdir(DIR)), 1)
 
         # check that old file has been overwritten
-        rows = []
-        with open(process.filename, 'r',  newline='') as f:
-            csvreader = csv.reader(f)
-            for row in csvreader:
-                rows.append(row)
+        rows = self.csv_to_list(process.filename)
         self.assertEqual(rows, [['logical clock', 'global time', 'event type', 'queue length']])
 
         # check that multiple logs can be created
@@ -50,15 +59,23 @@ class ScaleModelTest(unittest.TestCase):
             ModelMachine(1, ['port1', 'port2', i], DIR).init_log()
         self.assertEqual(len(os.listdir(DIR)), 10)
 
-        # delete directory after testing
         self.empty_directory(DIR)
         os.rmdir(DIR)
 
     def test_update_log(self):
-        # If no operations have been logged, length is 1
+        self.create_dir(DIR)
+        process = ModelMachine(1, ['port1', 'port2', 0], DIR)
+        process.init_log()
+        for i in range(100):
+            process.update_log([i, i, i, i])
 
-        # System time should be incremented by 1
-        pass
+        data = self.csv_to_list(process.filename)[1:]
+        expected = [[str(i)]*4 for i in range(100)]
+
+        self.assertEqual(data, expected)
+
+        self.empty_directory(DIR)
+        os.rmdir(DIR)
 
 
 if __name__ == '__main__':

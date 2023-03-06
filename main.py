@@ -31,7 +31,7 @@ class ModelMachine:
         self.logical_clock = 0
         self.filename = f"{directory}/pid_{self.pid}_clockrate_{str(self.clock_rate)}.csv"
 
-    # Performs initialization operations to setup a machine
+    # Performs initialization operations to set up a machine
     def init_machine(self):
         # Create csv file
         self.init_log()
