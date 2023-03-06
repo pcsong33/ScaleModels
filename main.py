@@ -67,7 +67,7 @@ class ModelMachine:
     # Initializes server-side connection
     def init_server(self):
         port = self.server_port
-        print(f"starting server | port val: {port}")
+        print(f"starting server | port val: {port} \n")
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind((HOST, port))
         s.listen()
@@ -79,7 +79,7 @@ class ModelMachine:
         while True:
             data = client_s.recv(1024)
             data_val = data.decode()
-            print(f"msg received: {data_val}")
+            print(f"msg received: {data_val} \n")
             self.msgs.append(data_val)
 
     # Initializes client-side connection
