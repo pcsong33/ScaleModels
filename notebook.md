@@ -1,10 +1,18 @@
 ## 3/6/23
 We've begun creating some unit tests. Code in `main.py` was slightly refactored to enable
-cleaner testing. We've also handled the exiting gracefully task by sending a "shutdown" message when the time limit has finished
+cleaner testing. 
 
 Current Unit Test Coverage:
 1. `init_logs`
 2. `update_logs`
+
+We've also handled the exiting gracefully task by sending a "shutdown" message when the time limit has finished.
+
+Finally, we've run some experiments (data in `logs/`) with deterministic clock rates in order to see the impact of different clock rates on the logs. Experiments with prefix `0.25internal` have a lowered 1/4 chance of an event being internal (i.e. we generate a random number from 1 to 4 instead of 1 to 10). Some preliminary observations:
+* When rates are constant across all machines, then there seem to be no gaps and logical_clock // clock_rate = global_clock as expected.
+* When rates differ across machines, no gaps seem to occur for the machine with the largest rate. Gaps do however occur for the other machines. Queue lengths get long for the machine with lowest clock rate, and they spend much more time receiving messages than sending/internal operations.
+* A guess: likely there is less drift if the differences are less stark, e.g. 4,4,4 vs 3,4,5 vs 1,3,6
+* The reason for drift is that all of the logical clocks are incrementing by 1 even though the machines have different speeds. So to fix this, I tried changing the increment value for each event from 1 to `1 / self.clock_rate` instead, and ran experiments with rates 1,3,6 with this modification (the logs with prefix `propinc`). Sure enough, there appears to be no drift, though I predict that the proportion of send/receive/internal is about the same. This is quite interesting; I wonder why logical clocks aren't defined as such in the first place. Likely because in practice, you wouldn't actually know the precise relative/absolute relationships of machine speeds?
 
 ## 3/5/23
 We've coded an implementation of the scale model using processes and threads. A design and scalability explanation is described below.

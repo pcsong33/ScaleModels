@@ -45,6 +45,7 @@ class ModelMachine:
     def init_log(self):
         if os.path.exists(self.filename):
             os.remove(self.filename)
+        os.makedirs(os.path.dirname(self.filename), exist_ok=True)
         with open(self.filename, 'w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(['logical clock', 'global time', 'event type', 'queue length'])
@@ -140,10 +141,9 @@ class ModelMachine:
 
 
 # Create a ModelMachine class for each process
-def machine(config):
-    config.append(os.getpid())
-    clock_rate = randint(1, 6)
-    model_machine = ModelMachine(clock_rate, config)
+def machine(config, clock_rate, directory="logs"):
+    config.append(os.getpid())    
+    model_machine = ModelMachine(clock_rate, config, directory)
     model_machine.init_machine()
     model_machine.perform_ops()
     return
@@ -155,13 +155,16 @@ if __name__ == '__main__':
     port3 = 4056
 
     config1 = [port1, port2]
-    p1 = Process(target=machine, args=(config1,))
+    clock_rate = randint(1, 6)
+    p1 = Process(target=machine, args=(config1, clock_rate))
 
     config2 = [port2, port3]
-    p2 = Process(target=machine, args=(config2,))
+    clock_rate = randint(1, 6)
+    p2 = Process(target=machine, args=(config2, clock_rate))
 
     config3 = [port3, port1]
-    p3 = Process(target=machine, args=(config3,))
+    clock_rate = randint(1, 6)
+    p3 = Process(target=machine, args=(config3, clock_rate))
 
     p1.start()
     p2.start()
