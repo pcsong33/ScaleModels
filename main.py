@@ -132,7 +132,7 @@ class ModelMachine:
 
                 self.logical_clock += 1
 
-            self.update_log([self.logical_clock, int(time()), event_type, len(self.msgs)])
+            self.update_log([self.logical_clock, int(time()) - start_time, event_type, len(self.msgs)])
 
         self.server_socket.sendall('shutdown'.encode())
         self.client_socket.sendall('shutdown'.encode())
