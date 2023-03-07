@@ -60,7 +60,7 @@ class ModelMachine:
     def server_messages(self, s):
         conn, addr = s.accept()
         self.server_socket = conn
-        print(f"consumer accepted connection {conn} \n")
+        print(f"consumer accepted connection {addr} \n")
         while True:
             data = conn.recv(1024)
             data_val = data.decode()
@@ -74,6 +74,7 @@ class ModelMachine:
         port = self.server_port
         print(f"starting server | port val: {port} \n")
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind((HOST, port))
         s.listen()
         # start background thread to listen for server messages
@@ -92,6 +93,7 @@ class ModelMachine:
     # Initializes client-side connection
     def init_client(self):
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         client_port = self.client_port
         try:
             client_socket.connect((HOST, client_port))
