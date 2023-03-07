@@ -1,6 +1,6 @@
 ## 3/6/23
 We've begun creating some unit tests. Code in `main.py` was slightly refactored to enable
-cleaner testing.
+cleaner testing. We've also handled the exiting gracefully task by sending a "shutdown" message when the time limit has finished
 
 Current Unit Test Coverage:
 1. `init_logs`

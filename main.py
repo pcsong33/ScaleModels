@@ -9,7 +9,7 @@ from threading import Thread
 import random
 import os
 
-# parameter controlling scale model experiment time
+# parameter controlling scale model experiment time, in seconds
 EXPERIMENT_LENGTH = 60
 HOST = "127.0.0.1"
 
@@ -63,6 +63,8 @@ class ModelMachine:
         while True:
             data = conn.recv(1024)
             data_val = data.decode()
+            if data_val == 'shutdown':
+                break
             print(f"msg received: {data_val} \n")
             self.msgs.append(data_val)
 
@@ -81,6 +83,8 @@ class ModelMachine:
         while True:
             data = client_s.recv(1024)
             data_val = data.decode()
+            if data_val == 'shutdown':
+                break
             print(f"msg received: {data_val} \n")
             self.msgs.append(data_val)
 
@@ -128,6 +132,10 @@ class ModelMachine:
                 self.logical_clock += 1
 
             self.update_log([self.logical_clock, int(time()), event_type, len(self.msgs)])
+
+        self.server_socket.sendall('shutdown'.encode())
+        self.client_socket.sendall('shutdown'.encode())
+
         return
 
 
