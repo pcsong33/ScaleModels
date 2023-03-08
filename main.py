@@ -107,9 +107,9 @@ class ModelMachine:
         Thread(target=self.client_messages, args=(client_socket,)).start()
 
     # Performs receive, send, and internal operations for a specified period of time
-    def perform_ops(self):
+    def perform_ops(self, length=EXPERIMENT_LENGTH):
         start_time = int(time())
-        while (int(time()) - start_time) <= EXPERIMENT_LENGTH:
+        while (int(time()) - start_time) <= length:
             sleep(1 / self.clock_rate)
             # if queue is nonempty pop message
             if self.msgs:
@@ -139,8 +139,6 @@ class ModelMachine:
         self.server_socket.sendall('shutdown'.encode())
         self.client_socket.sendall('shutdown'.encode())
 
-        return
-
 
 # Create a ModelMachine class for each process
 def machine(config, clock_rate, directory="logs"):
@@ -148,7 +146,6 @@ def machine(config, clock_rate, directory="logs"):
     model_machine = ModelMachine(clock_rate, config, directory)
     model_machine.init_machine()
     model_machine.perform_ops()
-    return
 
 
 if __name__ == '__main__':

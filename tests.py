@@ -8,7 +8,6 @@ import csv
 DIR = 'test_logs'
 
 
-
 class ScaleModelTest(unittest.TestCase):
     # Helper function to remove all files in a directory
     def empty_directory(self, dir):
@@ -35,19 +34,25 @@ class ScaleModelTest(unittest.TestCase):
     def silence_resource_warning(self):
         warnings.filterwarnings(action="ignore", message="unclosed", category=ResourceWarning)
 
-    def init_test_machines(self):
+    def init_test_machines(self, logs=False, cr=False):
         # Initialize 3 processes
         port1 = 5056
         port2 = 6056
         port3 = 7056
 
-        self.machine_1 = ModelMachine(1, [port1, port2, 1])
-        self.machine_2 = ModelMachine(1, [port2, port3, 2])
-        self.machine_3 = ModelMachine(1, [port3, port1, 3])
+        cr1 = cr2 = cr3 = 1
+        if cr:
+            cr2 = 2
+            cr3 = 3
+        self.machine_1 = ModelMachine(cr1, [port1, port2, 1], DIR)
+        self.machine_2 = ModelMachine(cr2, [port2, port3, 2], DIR)
+        self.machine_3 = ModelMachine(cr3, [port3, port1, 3], DIR)
 
         self.machines = [self.machine_1, self.machine_2, self.machine_3]
 
         for m in self.machines:
+            if logs:
+                m.init_log()
             m.init_server()
         sleep(3)
         for m in self.machines:
@@ -60,7 +65,6 @@ class ScaleModelTest(unittest.TestCase):
         sleep(3)
         for m in self.machines:
             m.server_socket.sendall('shutdown'.encode())
-
 
     def test_init_log(self):
         self.create_dir(DIR)
@@ -124,6 +128,16 @@ class ScaleModelTest(unittest.TestCase):
         self.assertEqual(self.machine_2.client_port, 7056)
         self.assertEqual(self.machine_3.client_port, 5056)
 
+        # check that server sockets have been created
+        self.assertIsNotNone(self.machine_1.server_socket)
+        self.assertIsNotNone(self.machine_2.server_socket)
+        self.assertIsNotNone(self.machine_3.server_socket)
+
+        # check that client sockets have been created
+        self.assertIsNotNone(self.machine_1.client_socket)
+        self.assertIsNotNone(self.machine_2.client_socket)
+        self.assertIsNotNone(self.machine_3.client_socket)
+
         # close test machines
         self.close_machines()
 
@@ -132,10 +146,16 @@ class ScaleModelTest(unittest.TestCase):
         self.init_test_machines()
         self.silence_resource_warning()
 
-        # test single message send
+        # ensure message queues are empty on initialization
+        self.assertEqual(self.machine_1.msgs, deque([]))
+        self.assertEqual(self.machine_2.msgs, deque([]))
+        self.assertEqual(self.machine_3.msgs, deque([]))
+
+        # test single message send, sleep for clock cycle
         self.machine_1.client_socket.sendall('hello'.encode())
+        sleep(0.2)
         self.machine_1.server_socket.sendall('goodbye'.encode())
-        sleep(1)
+        sleep(0.2)
         self.assertEqual(self.machine_2.msgs, deque(['hello']))
         self.assertEqual(self.machine_3.msgs, deque(['goodbye']))
 
@@ -149,6 +169,43 @@ class ScaleModelTest(unittest.TestCase):
 
         # close test machines
         self.close_machines()
+
+    def test_perform_ops(self):
+
+        self.create_dir(DIR)
+
+        # set up test machine
+        self.init_test_machines(logs=True)
+        self.silence_resource_warning()
+
+        for m in self.machines:
+            m.perform_ops(5)
+
+        # assert that each log has 6 more than entries (could be 7 due to <=)
+        for m in self.machines:
+            length = len(self.csv_to_list(m.filename))
+            self.assertGreaterEqual(length, 6)
+
+        # close test machines
+        self.close_machines()
+
+        # initialize machines with different clock rates
+        self.init_test_machines(logs=True, cr=True)
+
+        for m in self.machines:
+            m.perform_ops(5)
+
+        # test that each machine has a different length output csv
+        length_1 = len(self.csv_to_list(self.machine_1.filename))
+        length_2 = len(self.csv_to_list(self.machine_2.filename))
+        length_3 = len(self.csv_to_list(self.machine_3.filename))
+
+        self.assertNotEqual(length_1, length_2)
+        self.assertNotEqual(length_2, length_3)
+        self.assertNotEqual(length_1, length_3)
+
+        self.empty_directory(DIR)
+        os.rmdir(DIR)
 
 
 if __name__ == '__main__':
