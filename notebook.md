@@ -1,3 +1,6 @@
+## 3/7/23
+We've updated the unit tests to all functions in `main.py`.
+
 ## 3/6/23
 We've begun creating some unit tests. Code in `main.py` was slightly refactored to enable
 cleaner testing. 
