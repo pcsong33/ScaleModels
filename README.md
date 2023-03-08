@@ -9,7 +9,7 @@
 
 
 ### Design choices
-* Decentralized server: TODO
-* Background thread for receiving messages: This allows messages to be received simulataneously for each machine, without disrupting the clock cycle that must process these incoming messages.
-* Sockets: We used the sockets for machines to connect to each other in order for our implemenation to be able to be deployed across multiple physical hosts.
+* We implemented the scale mode using a de-centralized network. With centralized servers, there are scalability concerns, since there is a single point of failure: if the server goes down or experiences a failure, it can cause disruptions to all the clients. Our scale model distributes the message load and number of connections across all machines, reducing the reliance on the resources of a single machine. 
+* Background thread for receiving messages: This allows messages to be received simultaneously for each machine, without disrupting the clock cycle that must process these incoming messages.
+* Sockets: We used the sockets for machines to connect to each other in order for our implementation to be able to be deployed across multiple physical hosts.
 * No shared data structures: All data structures are internal within each ModelMachine, so that there is no concurrency overhead as the model scales.
