@@ -9,3 +9,7 @@
 
 
 ### Design choices
+* Decentralized server: TODO
+* Background thread for receiving messages: This allows messages to be received simulataneously for each machine, without disrupting the clock cycle that must process these incoming messages.
+* Sockets: We used the sockets for machines to connect to each other in order for our implemenation to be able to be deployed across multiple physical hosts.
+* No shared data structures: All data structures are internal within each ModelMachine, so that there is no concurrency overhead as the model scales.
