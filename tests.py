@@ -167,24 +167,32 @@ class ScaleModelTest(unittest.TestCase):
 
         self.assertEqual(self.machine_1.msgs, deque(['I', 'dont', 'know', 'you', 'bye']))
 
+        # test sending multiple messages to server socket too
+        msgs = deque(['I', 'know', 'you', 'hi'])
+        for msg in msgs:
+            self.machine_3.server_socket.sendall(msg.encode())
+            sleep(0.2)
+
+        self.assertEqual(self.machine_2.msgs, deque(['hello', 'I', 'know', 'you', 'hi']))
+
         # close test machines
         self.close_machines()
 
     def test_perform_ops(self):
-
         self.create_dir(DIR)
+        experiment_length = 10
 
         # set up test machine
         self.init_test_machines(logs=True)
         self.silence_resource_warning()
 
         for m in self.machines:
-            m.perform_ops(5)
+            m.perform_ops(experiment_length)
 
-        # assert that each log has 6 more than entries (could be 7 due to <=)
+        # assert that each log has roughly experiment_length entries (minus 1 to account for header)
         for m in self.machines:
             length = len(self.csv_to_list(m.filename))
-            self.assertGreaterEqual(length, 6)
+            self.assertAlmostEqual(length, experiment_length + 1, delta=1)
 
         # close test machines
         self.close_machines()
@@ -193,16 +201,38 @@ class ScaleModelTest(unittest.TestCase):
         self.init_test_machines(logs=True, cr=True)
 
         for m in self.machines:
-            m.perform_ops(5)
+            m.perform_ops(experiment_length)
 
-        # test that each machine has a different length output csv
-        length_1 = len(self.csv_to_list(self.machine_1.filename))
-        length_2 = len(self.csv_to_list(self.machine_2.filename))
-        length_3 = len(self.csv_to_list(self.machine_3.filename))
+        # test that each machine has output csv roughly length experiment length * clock rate
+        logs_1 = self.csv_to_list(self.machine_1.filename)[1:]
+        logs_2 = self.csv_to_list(self.machine_2.filename)[1:]
+        logs_3 = self.csv_to_list(self.machine_3.filename)[1:]
 
-        self.assertNotEqual(length_1, length_2)
-        self.assertNotEqual(length_2, length_3)
-        self.assertNotEqual(length_1, length_3)
+        length_1 = len(logs_1)
+        length_2 = len(logs_2)
+        length_3 = len(logs_3)
+
+        self.assertAlmostEqual(length_1, experiment_length * 1, delta=1)
+        self.assertAlmostEqual(length_2, experiment_length * 2, delta=2)
+        self.assertAlmostEqual(length_3, experiment_length * 3, delta=3)
+
+        # test that logs are valid
+        prev0 = 0
+        prev1 = 0
+        for log in logs_1:
+            # logical clock should be incrementing by at least 1
+            self.assertGreaterEqual(int(log[0]) - prev0, 1)
+
+            # global clock should be incrementing by at least 0
+            self.assertGreaterEqual(int(log[1]) - prev1, 0)
+
+            # if queue length > 0, event should be 'receive'
+            if int(log[3]) > 0:
+                self.assertEquals(log[2], 'receive')
+
+            prev0 = int(log[0])
+            prev1 = int(log[1])
+
 
         self.empty_directory(DIR)
         os.rmdir(DIR)
