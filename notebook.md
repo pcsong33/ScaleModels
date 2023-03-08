@@ -1,4 +1,16 @@
 ## 3/7/23
+We've started a jupyter notebook file `analysis.ipynb` that houses functions that perform data cleaning, analysis, and visualization on 
+the output logs of our experiments. Currently, the notebook contains functions for:
+* converting csv files to dataframes
+* averaging results across dataframes
+* graphing results across different machines
+* calculating average jump values for logical clocks
+
+The `analysis.ipynb` notebook also contains a deeper analysis
+of the results of our experimental trials, a continuation of the preliminary observations
+noted in this notebook file.
+
+## 3/7/23
 We've updated the unit tests to all functions in `main.py`.
 
 ## 3/6/23
